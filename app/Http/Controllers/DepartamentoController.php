@@ -1,21 +1,24 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Departamento;
-use App\Models\Empleado; // Asegúrate de importar el modelo Empleado
+use App\Models\Empleado;
 use Illuminate\Http\Request;
 
 class DepartamentoController extends Controller
 {
     public function index()
     {
-        $departamentos = Departamento::all();
+        // Carga la relación jefe para evitar múltiples consultas (N+1 problem)
+        $departamentos = Departamento::with('jefe')->get();
+
         return view('departamentos.index', compact('departamentos'));
     }
 
     public function create()
     {
-        $jefes = Empleado::all();  // Traes todos los empleados para elegir jefe
+        $jefes = Empleado::orderBy('nombres')->get();  // Ordenado alfabéticamente para mejor UX
         return view('departamentos.create', compact('jefes'));
     }
 
@@ -25,9 +28,12 @@ class DepartamentoController extends Controller
             'nombre' => 'required|string|unique:departamentos,nombre|max:255',
             'codigo' => 'required|string|unique:departamentos,codigo|max:50',
             'descripcion' => 'nullable|string',
-            'activo' => 'sometimes|boolean',
+            'activo' => 'nullable|boolean',
             'jefe_id' => 'nullable|exists:empleados,id',
         ]);
+
+        // Asegura que el campo activo siempre tenga valor (checkboxes no enviados si no están seleccionados)
+        $validated['activo'] = $request->has('activo');
 
         Departamento::create($validated);
 
@@ -41,7 +47,7 @@ class DepartamentoController extends Controller
 
     public function edit(Departamento $departamento)
     {
-        $jefes = Empleado::all(); // También necesitas esto en el edit si usas jefes ahí
+        $jefes = Empleado::orderBy('nombre')->get();
         return view('departamentos.edit', compact('departamento', 'jefes'));
     }
 
@@ -51,9 +57,11 @@ class DepartamentoController extends Controller
             'nombre' => 'required|string|max:255|unique:departamentos,nombre,' . $departamento->id,
             'codigo' => 'required|string|max:50|unique:departamentos,codigo,' . $departamento->id,
             'descripcion' => 'nullable|string',
-            'activo' => 'sometimes|boolean',
+            'activo' => 'nullable|boolean',
             'jefe_id' => 'nullable|exists:empleados,id',
         ]);
+
+        $validated['activo'] = $request->has('activo');
 
         $departamento->update($validated);
 
