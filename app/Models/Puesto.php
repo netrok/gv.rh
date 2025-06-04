@@ -7,14 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Puesto extends Model
 {
-    use HasFactory;
+    protected $fillable = ['nombre', 'clave', 'descripcion', 'salario_base', 'departamento_id'];
 
-    protected $fillable = [
-        'nombre',
-        'descripcion'
-    ];
+    public function departamento()
+    {
+        return $this->belongsTo(Departamento::class);
+    }
 
-    // Relaciones
     public function empleados()
     {
         return $this->hasMany(Empleado::class);

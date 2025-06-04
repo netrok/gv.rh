@@ -1,41 +1,63 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md mt-8">
-    <h2 class="text-2xl font-semibold text-gray-700 mb-6">Crear Nuevo Puesto</h2>
+<div class="max-w-3xl mx-auto p-6 bg-white rounded shadow mt-8">
+    <h1 class="text-2xl font-semibold mb-6">Crear Puesto</h1>
+
+    @if ($errors->any())
+        <div class="mb-4 bg-red-100 text-red-700 px-4 py-3 rounded">
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <form action="{{ route('puestos.store') }}" method="POST" class="space-y-6">
         @csrf
 
         <div>
-            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Puesto</label>
+            <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
             <input type="text" name="nombre" id="nombre" value="{{ old('nombre') }}"
-                class="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Ejemplo: Analista de Sistemas" required>
-            @error('nombre')
-                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-            @enderror
+                   class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500" required>
         </div>
 
         <div>
-            <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <textarea name="descripcion" id="descripcion" rows="4"
-                class="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Descripción del puesto">{{ old('descripcion') }}</textarea>
-            @error('descripcion')
-                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-            @enderror
+            <label for="clave" class="block text-sm font-medium text-gray-700">Clave</label>
+            <input type="text" name="clave" id="clave" value="{{ old('clave') }}"
+                   class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
         </div>
 
-        <div class="flex justify-end space-x-4">
-            <a href="{{ route('puestos.index') }}"
-                class="inline-block px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
-                Cancelar
-            </a>
-            <button type="submit"
-                class="inline-block px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-                Guardar Puesto
-            </button>
+        <div>
+            <label for="departamento_id" class="block text-sm font-medium text-gray-700">Departamento</label>
+            <select name="departamento_id" id="departamento_id"
+                    class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="">-- Selecciona --</option>
+                @foreach ($departamentos as $departamento)
+                    <option value="{{ $departamento->id }}" {{ old('departamento_id') == $departamento->id ? 'selected' : '' }}>
+                        {{ $departamento->nombre }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label for="salario_base" class="block text-sm font-medium text-gray-700">Salario Base</label>
+            <input type="number" name="salario_base" id="salario_base" value="{{ old('salario_base') }}"
+                   step="0.01" min="0"
+                   class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+
+        <div>
+            <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción</label>
+            <textarea name="descripcion" id="descripcion" rows="4"
+                      class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">{{ old('descripcion') }}</textarea>
+        </div>
+
+        <div class="flex justify-end space-x-2">
+            <a href="{{ route('puestos.index') }}" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Cancelar</a>
+            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Guardar</button>
         </div>
     </form>
 </div>

@@ -12,8 +12,12 @@ return new class extends Migration {
     {
         Schema::create('puestos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
+            $table->string('nombre');
+            $table->string('clave')->nullable()->unique();
             $table->text('descripcion')->nullable();
+            $table->decimal('salario_base', 10, 2)->nullable();
+            $table->unsignedBigInteger('departamento_id')->nullable();
+            $table->foreign('departamento_id')->references('id')->on('departamentos')->onDelete('set null');
             $table->timestamps();
         });
     }
