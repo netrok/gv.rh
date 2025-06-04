@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Departamento;
+use App\Models\Empleado; // Asegúrate de importar el modelo Empleado
 use Illuminate\Http\Request;
 
 class DepartamentoController extends Controller
@@ -15,17 +15,21 @@ class DepartamentoController extends Controller
 
     public function create()
     {
-        return view('departamentos.create');
+        $jefes = Empleado::all();  // Traes todos los empleados para elegir jefe
+        return view('departamentos.create', compact('jefes'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required|unique:departamentos,nombre',
-            'descripcion' => 'nullable'
+        $validated = $request->validate([
+            'nombre' => 'required|string|unique:departamentos,nombre|max:255',
+            'codigo' => 'required|string|unique:departamentos,codigo|max:50',
+            'descripcion' => 'nullable|string',
+            'activo' => 'sometimes|boolean',
+            'jefe_id' => 'nullable|exists:empleados,id',
         ]);
 
-        Departamento::create($request->all());
+        Departamento::create($validated);
 
         return redirect()->route('departamentos.index')->with('success', 'Departamento creado correctamente.');
     }
@@ -37,17 +41,21 @@ class DepartamentoController extends Controller
 
     public function edit(Departamento $departamento)
     {
-        return view('departamentos.edit', compact('departamento'));
+        $jefes = Empleado::all(); // También necesitas esto en el edit si usas jefes ahí
+        return view('departamentos.edit', compact('departamento', 'jefes'));
     }
 
     public function update(Request $request, Departamento $departamento)
     {
-        $request->validate([
-            'nombre' => 'required|unique:departamentos,nombre,'.$departamento->id,
-            'descripcion' => 'nullable'
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255|unique:departamentos,nombre,' . $departamento->id,
+            'codigo' => 'required|string|max:50|unique:departamentos,codigo,' . $departamento->id,
+            'descripcion' => 'nullable|string',
+            'activo' => 'sometimes|boolean',
+            'jefe_id' => 'nullable|exists:empleados,id',
         ]);
 
-        $departamento->update($request->all());
+        $departamento->update($validated);
 
         return redirect()->route('departamentos.index')->with('success', 'Departamento actualizado correctamente.');
     }
@@ -55,6 +63,7 @@ class DepartamentoController extends Controller
     public function destroy(Departamento $departamento)
     {
         $departamento->delete();
+
         return redirect()->route('departamentos.index')->with('success', 'Departamento eliminado correctamente.');
     }
 }

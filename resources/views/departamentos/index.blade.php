@@ -21,17 +21,31 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Código</th>
                     <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Nombre</th>
                     <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Descripción</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Jefe</th>
+                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Estado</th>
                     <th class="px-4 py-2 text-right text-sm font-medium text-gray-700">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($departamentos as $departamento)
-                    <tr class="border-t">
+                    <tr class="border-t hover:bg-gray-50">
                         <td class="px-4 py-2">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-2">{{ $departamento->codigo }}</td>
                         <td class="px-4 py-2">{{ $departamento->nombre }}</td>
                         <td class="px-4 py-2">{{ $departamento->descripcion }}</td>
+                        <td class="px-4 py-2">
+                            {{ $departamento->jefe ? $departamento->jefe->nombre : 'No asignado' }}
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            @if($departamento->activo)
+                                <span class="px-2 py-1 text-sm bg-green-100 text-green-700 rounded">Activo</span>
+                            @else
+                                <span class="px-2 py-1 text-sm bg-red-100 text-red-600 rounded">Inactivo</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-2 text-right space-x-2">
                             <a href="{{ route('departamentos.edit', $departamento->id) }}"
                                 class="inline-block px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition">
@@ -50,7 +64,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-gray-500">
+                        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
                             No hay departamentos registrados.
                         </td>
                     </tr>

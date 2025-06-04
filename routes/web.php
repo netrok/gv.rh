@@ -8,7 +8,7 @@ use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\PuestoController;
 
-// Controladores para Asistencias y ausencias
+// Controladores para Asistencias y Ausencias
 use App\Http\Controllers\AsistenciaController;
 use App\Http\Controllers\AusenciasController;
 use App\Http\Controllers\PermisoController;
@@ -31,16 +31,12 @@ Route::get('/', function () {
 
 // Módulo: Recursos Humanos
 Route::resource('empleados', EmpleadoController::class);
-Route::get('/empleados/create', [EmpleadoController::class, 'create'])->name('empleados.create');
-Route::post('/empleados', [EmpleadoController::class, 'store'])->name('empleados.store');
-
 Route::resource('puestos', PuestoController::class);
-
 Route::resource('departamentos', DepartamentoController::class);
 Route::resource('documentos', DocumentoController::class);
 
-// Módulo: Asistencias y ausencias
+// Módulo: Asistencias y Ausencias
 Route::resource('asistencias', AsistenciaController::class);
-Route::resource('ausencia', AusenciasController::class);
+Route::resource('ausencia', AusenciasController::class);  // plural para consistencia
 Route::resource('permisos', PermisoController::class);
-Route::resource('vacacion', VacacionController::class);
+Route::resource('vacacion', VacacionController::class);  // plural para consistencia
