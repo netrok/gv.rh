@@ -13,9 +13,13 @@ return new class extends Migration {
         Schema::create('departamentos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+            $table->string('codigo')->unique();
             $table->text('descripcion')->nullable();
+            $table->boolean('activo')->default(true);
+            $table->unsignedBigInteger('jefe_id')->nullable(); // solo la columna, sin FK
             $table->timestamps();
         });
+
     }
 
     /**

@@ -24,12 +24,14 @@ class Empleado extends Model
         'email',
         'puesto_id',
         'departamento_id',
+        'jefe_id',
         'fecha_ingreso',
         'activo',
         'foto'
     ];
 
     // Relaciones
+
     public function puesto()
     {
         return $this->belongsTo(Puesto::class);
@@ -58,5 +60,21 @@ class Empleado extends Model
     public function permisos()
     {
         return $this->hasMany(Permiso::class);
+    }
+
+    /**
+     * Relación jerárquica: jefe directo del empleado
+     */
+    public function jefe()
+    {
+        return $this->belongsTo(Empleado::class, 'jefe_id');
+    }
+
+    /**
+     * Relación inversa: empleados subordinados a este empleado
+     */
+    public function subordinados()
+    {
+        return $this->hasMany(Empleado::class, 'jefe_id');
     }
 }

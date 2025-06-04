@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Empleado;
@@ -12,7 +11,7 @@ class EmpleadoController extends Controller
 {
     public function index()
     {
-        $empleados = Empleado::with(['puesto', 'departamento'])->paginate(10);
+        $empleados = Empleado::with(['puesto', 'departamento', 'jefe'])->paginate(10);
         return view('empleados.index', compact('empleados'));
     }
 
@@ -20,7 +19,8 @@ class EmpleadoController extends Controller
     {
         $puestos = Puesto::all();
         $departamentos = Departamento::all();
-        return view('empleados.create', compact('puestos', 'departamentos'));
+        $jefes = Empleado::all(); // Puedes filtrar por roles si lo deseas
+        return view('empleados.create', compact('puestos', 'departamentos', 'jefes'));
     }
 
     public function store(Request $request)
@@ -40,14 +40,16 @@ class EmpleadoController extends Controller
             'email' => 'nullable|email|max:255',
             'puesto_id' => 'required|exists:puestos,id',
             'departamento_id' => 'required|exists:departamentos,id',
+            'jefe_id' => 'nullable|exists:empleados,id',
             'fecha_ingreso' => 'required|date',
             'activo' => 'boolean',
-            'foto' => 'nullable|image|max:2048'
+            'foto' => 'nullable|image|max:2048',
         ]);
 
-        // Activo puede no venir, poner default
-        $validated['activo'] = $request->has('activo') ? true : false;
+        // Ajustar valor booleano 'activo' según checkbox
+        $validated['activo'] = $request->has('activo');
 
+        // Manejo de la imagen si existe
         if ($request->hasFile('foto')) {
             $validated['foto'] = $request->file('foto')->store('fotos', 'public');
         }
@@ -59,7 +61,7 @@ class EmpleadoController extends Controller
 
     public function show(Empleado $empleado)
     {
-        $empleado->load(['puesto', 'departamento', 'documentos', 'asistencias', 'vacaciones', 'permisos']);
+        $empleado->load(['puesto', 'departamento', 'jefe', 'documentos', 'asistencias', 'vacaciones', 'permisos']);
         return view('empleados.show', compact('empleado'));
     }
 
@@ -67,7 +69,8 @@ class EmpleadoController extends Controller
     {
         $puestos = Puesto::all();
         $departamentos = Departamento::all();
-        return view('empleados.edit', compact('empleado', 'puestos', 'departamentos'));
+        $jefes = Empleado::where('id', '!=', $empleado->id)->get(); // Evitar asignar como jefe a sí mismo
+        return view('empleados.edit', compact('empleado', 'puestos', 'departamentos', 'jefes'));
     }
 
     public function update(Request $request, Empleado $empleado)
@@ -87,15 +90,17 @@ class EmpleadoController extends Controller
             'email' => 'nullable|email|max:255',
             'puesto_id' => 'required|exists:puestos,id',
             'departamento_id' => 'required|exists:departamentos,id',
+            'jefe_id' => 'nullable|exists:empleados,id|not_in:' . $empleado->id,
             'fecha_ingreso' => 'required|date',
             'activo' => 'boolean',
-            'foto' => 'nullable|image|max:2048'
+            'foto' => 'nullable|image|max:2048',
         ]);
 
-        $validated['activo'] = $request->has('activo') ? true : false;
+        // Ajustar valor booleano 'activo' según checkbox
+        $validated['activo'] = $request->has('activo');
 
+        // Manejo de imagen: elimina anterior si hay nueva foto
         if ($request->hasFile('foto')) {
-            // Eliminar foto anterior si existe
             if ($empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
                 Storage::disk('public')->delete($empleado->foto);
             }
@@ -109,7 +114,7 @@ class EmpleadoController extends Controller
 
     public function destroy(Empleado $empleado)
     {
-        // Eliminar foto si existe
+        // Elimina foto si existe
         if ($empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
             Storage::disk('public')->delete($empleado->foto);
         }
