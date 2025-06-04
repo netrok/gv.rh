@@ -47,7 +47,7 @@ class DepartamentoController extends Controller
 
     public function edit(Departamento $departamento)
     {
-        $jefes = Empleado::orderBy('nombre')->get();
+        $jefes = Empleado::orderBy('nombres')->get();
         return view('departamentos.edit', compact('departamento', 'jefes'));
     }
 
