@@ -21,6 +21,8 @@
             <nav>
                 <ul class="flex space-x-4 text-gray-700">
                     <li><a href="{{ route('empleados.index') }}" class="hover:text-blue-800">Empleados</a></li>
+                    <li><a href="{{ route('puestos.index') }}" class="hover:text-blue-800">Puestos</a></li>
+                     <li><a href="{{ route('departamentos.index') }}" class="hover:text-blue-800">Departamentos</a></li>
                     <li><a href="{{ route('asistencias.index') }}" class="hover:text-blue-800">Asistencia</a></li>
                     <li><a href="{{ route('ausencia.index') }}" class="hover:text-blue-800">Ausencia</a></li>
                     <li><a href="{{ route('vacacion.index') }}" class="hover:text-blue-800">Vacaciones</a></li>

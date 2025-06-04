@@ -6,6 +6,7 @@ use App\Models\Empleado;
 use App\Models\Puesto;
 use App\Models\Departamento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class EmpleadoController extends Controller
 {
@@ -44,11 +45,15 @@ class EmpleadoController extends Controller
             'foto' => 'nullable|image|max:2048'
         ]);
 
+        // Activo puede no venir, poner default
+        $validated['activo'] = $request->has('activo') ? true : false;
+
         if ($request->hasFile('foto')) {
             $validated['foto'] = $request->file('foto')->store('fotos', 'public');
         }
 
         Empleado::create($validated);
+
         return redirect()->route('empleados.index')->with('success', 'Empleado creado exitosamente.');
     }
 
@@ -87,17 +92,30 @@ class EmpleadoController extends Controller
             'foto' => 'nullable|image|max:2048'
         ]);
 
+        $validated['activo'] = $request->has('activo') ? true : false;
+
         if ($request->hasFile('foto')) {
+            // Eliminar foto anterior si existe
+            if ($empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
+                Storage::disk('public')->delete($empleado->foto);
+            }
             $validated['foto'] = $request->file('foto')->store('fotos', 'public');
         }
 
         $empleado->update($validated);
+
         return redirect()->route('empleados.index')->with('success', 'Empleado actualizado exitosamente.');
     }
 
     public function destroy(Empleado $empleado)
     {
+        // Eliminar foto si existe
+        if ($empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
+            Storage::disk('public')->delete($empleado->foto);
+        }
+
         $empleado->delete();
+
         return redirect()->route('empleados.index')->with('success', 'Empleado eliminado exitosamente.');
     }
 }

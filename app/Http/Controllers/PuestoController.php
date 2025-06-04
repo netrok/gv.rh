@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 
 class PuestoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $puestos = Puesto::all();
+        $query = Puesto::query();
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('nombre', 'like', "%{$search}%");
+        }
+
+        $puestos = $query->orderBy('id', 'desc')->paginate(10);  // <- paginate aquí
+
         return view('puestos.index', compact('puestos'));
     }
 
