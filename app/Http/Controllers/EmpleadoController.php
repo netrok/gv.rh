@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Empleado;
@@ -19,20 +20,20 @@ class EmpleadoController extends Controller
     {
         $puestos = Puesto::all();
         $departamentos = Departamento::all();
-        $jefes = Empleado::all(); // Puedes filtrar por roles si lo deseas
+        $jefes = Empleado::where('activo', true)->get();
         return view('empleados.create', compact('puestos', 'departamentos', 'jefes'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'num_empleado' => 'required|unique:empleados',
+            'num_empleado' => 'required|unique:empleados,num_empleado',
             'nombres' => 'required|string|max:255',
             'apellido_paterno' => 'required|string|max:255',
             'apellido_materno' => 'nullable|string|max:255',
             'fecha_nacimiento' => 'required|date',
-            'genero' => 'required|string',
-            'estado_civil' => 'nullable|string',
+            'genero' => 'required|string|in:M,F,O',
+            'estado_civil' => 'nullable|string|in:soltero,casado,divorciado,viudo',
             'curp' => 'nullable|string|max:18',
             'rfc' => 'nullable|string|max:13',
             'nss' => 'nullable|string|max:11',
@@ -43,16 +44,11 @@ class EmpleadoController extends Controller
             'jefe_id' => 'nullable|exists:empleados,id',
             'fecha_ingreso' => 'required|date',
             'activo' => 'boolean',
-            'foto' => 'nullable|image|max:2048',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Ajustar valor booleano 'activo' según checkbox
         $validated['activo'] = $request->has('activo');
-
-        // Manejo de la imagen si existe
-        if ($request->hasFile('foto')) {
-            $validated['foto'] = $request->file('foto')->store('fotos', 'public');
-        }
+        $validated['foto'] = $this->manejarFoto($request);
 
         Empleado::create($validated);
 
@@ -69,7 +65,7 @@ class EmpleadoController extends Controller
     {
         $puestos = Puesto::all();
         $departamentos = Departamento::all();
-        $jefes = Empleado::where('id', '!=', $empleado->id)->get(); // Evitar asignar como jefe a sí mismo
+        $jefes = Empleado::where('id', '!=', $empleado->id)->where('activo', true)->get();
         return view('empleados.edit', compact('empleado', 'puestos', 'departamentos', 'jefes'));
     }
 
@@ -81,8 +77,8 @@ class EmpleadoController extends Controller
             'apellido_paterno' => 'required|string|max:255',
             'apellido_materno' => 'nullable|string|max:255',
             'fecha_nacimiento' => 'required|date',
-            'genero' => 'required|string',
-            'estado_civil' => 'nullable|string',
+            'genero' => 'required|string|in:M,F,O',
+            'estado_civil' => 'nullable|string|in:soltero,casado,divorciado,viudo',
             'curp' => 'nullable|string|max:18',
             'rfc' => 'nullable|string|max:13',
             'nss' => 'nullable|string|max:11',
@@ -93,19 +89,11 @@ class EmpleadoController extends Controller
             'jefe_id' => 'nullable|exists:empleados,id|not_in:' . $empleado->id,
             'fecha_ingreso' => 'required|date',
             'activo' => 'boolean',
-            'foto' => 'nullable|image|max:2048',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Ajustar valor booleano 'activo' según checkbox
         $validated['activo'] = $request->has('activo');
-
-        // Manejo de imagen: elimina anterior si hay nueva foto
-        if ($request->hasFile('foto')) {
-            if ($empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
-                Storage::disk('public')->delete($empleado->foto);
-            }
-            $validated['foto'] = $request->file('foto')->store('fotos', 'public');
-        }
+        $validated['foto'] = $this->manejarFoto($request, $empleado);
 
         $empleado->update($validated);
 
@@ -114,7 +102,10 @@ class EmpleadoController extends Controller
 
     public function destroy(Empleado $empleado)
     {
-        // Elimina foto si existe
+        if (Empleado::where('jefe_id', $empleado->id)->exists()) {
+            return redirect()->route('empleados.index')->with('error', 'No se puede eliminar al empleado porque es jefe de otros empleados.');
+        }
+
         if ($empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
             Storage::disk('public')->delete($empleado->foto);
         }
@@ -122,5 +113,20 @@ class EmpleadoController extends Controller
         $empleado->delete();
 
         return redirect()->route('empleados.index')->with('success', 'Empleado eliminado exitosamente.');
+    }
+
+    private function manejarFoto(Request $request, Empleado $empleado = null)
+    {
+        if ($request->hasFile('foto')) {
+            if ($empleado && $empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
+                Storage::disk('public')->delete($empleado->foto);
+            }
+
+            $file = $request->file('foto');
+            $filename = uniqid() . '.' . $file->extension();
+            return $file->storeAs('fotos', $filename, 'public');
+        }
+
+        return $empleado ? $empleado->foto : null;
     }
 }
