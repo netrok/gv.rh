@@ -20,6 +20,127 @@
     </div>
 @endif
 
+<!-- Filtros de Búsqueda -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+    <form method="GET" action="{{ route('empleados.index') }}" class="space-y-4">
+        <div class="flex flex-wrap items-end gap-4">
+            <!-- Búsqueda por nombre -->
+            <div class="flex-1 min-w-64">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Buscar por nombre</label>
+                <input type="text" 
+                       id="search" 
+                       name="search" 
+                       value="{{ request('search') }}"
+                       placeholder="Buscar empleado..."
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <!-- Filtro por departamento -->
+            <div class="min-w-48">
+                <label for="departamento" class="block text-sm font-medium text-gray-700 mb-2">Departamento</label>
+                <select name="departamento_id" id="departamento" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Todos los departamentos</option>
+                    @foreach($departamentos as $departamento)
+                        <option value="{{ $departamento->id }}" {{ request('departamento_id') == $departamento->id ? 'selected' : '' }}>
+                            {{ $departamento->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filtro por puesto -->
+            <div class="min-w-48">
+                <label for="puesto" class="block text-sm font-medium text-gray-700 mb-2">Puesto</label>
+                <select name="puesto_id" id="puesto" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Todos los puestos</option>
+                    @foreach($puestos as $puesto)
+                        <option value="{{ $puesto->id }}" {{ request('puesto_id') == $puesto->id ? 'selected' : '' }}>
+                            {{ $puesto->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Filtro por estado -->
+            <div class="min-w-36">
+                <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                <select name="activo" id="estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Todos</option>
+                    <option value="1" {{ request('activo') === '1' ? 'selected' : '' }}>Activos</option>
+                    <option value="0" {{ request('activo') === '0' ? 'selected' : '' }}>Inactivos</option>
+                </select>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex gap-2">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    Buscar
+                </button>
+                <a href="{{ route('empleados.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Limpiar
+                </a>
+            </div>
+        </div>
+
+        <!-- Mostrar filtros activos -->
+        @if(request()->hasAny(['search', 'departamento_id', 'puesto_id', 'activo']))
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+                <span class="text-sm text-gray-600">Filtros activos:</span>
+                
+                @if(request('search'))
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Nombre: "{{ request('search') }}"
+                        <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="ml-2 text-blue-600 hover:text-blue-800">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </a>
+                    </span>
+                @endif
+
+                @if(request('departamento_id'))
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Departamento: {{ $departamentos->find(request('departamento_id'))->nombre ?? 'Desconocido' }}
+                        <a href="{{ request()->fullUrlWithQuery(['departamento_id' => null]) }}" class="ml-2 text-green-600 hover:text-green-800">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </a>
+                    </span>
+                @endif
+
+                @if(request('puesto_id'))
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        Puesto: {{ $puestos->find(request('puesto_id'))->nombre ?? 'Desconocido' }}
+                        <a href="{{ request()->fullUrlWithQuery(['puesto_id' => null]) }}" class="ml-2 text-purple-600 hover:text-purple-800">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </a>
+                    </span>
+                @endif
+
+                @if(request('activo') !== null)
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Estado: {{ request('activo') === '1' ? 'Activos' : 'Inactivos' }}
+                        <a href="{{ request()->fullUrlWithQuery(['activo' => null]) }}" class="ml-2 text-yellow-600 hover:text-yellow-800">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </a>
+                    </span>
+                @endif
+            </div>
+        @endif
+    </form>
+</div>
+
 <!-- Estadísticas rápidas -->
 <div class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
     <div class="bg-white rounded-lg shadow p-6">
@@ -78,6 +199,13 @@
         </div>
     </div>
 </div>
+
+<!-- Resultados de búsqueda -->
+@if(request()->hasAny(['search', 'departamento_id', 'puesto_id', 'activo']))
+    <div class="mb-4 text-sm text-gray-600">
+        Mostrando {{ $empleados->count() }} de {{ $empleados->total() }} empleados
+    </div>
+@endif
 
 <div class="overflow-x-auto">
     <table class="min-w-full bg-white shadow rounded overflow-hidden">
@@ -167,11 +295,19 @@
                             <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
-                            <p class="text-lg font-medium">No hay empleados registrados</p>
-                            <p class="text-sm">Comienza agregando tu primer empleado</p>
-                            <a href="{{ route('empleados.create') }}" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                                Crear Empleado
-                            </a>
+                            @if(request()->hasAny(['search', 'departamento_id', 'puesto_id', 'activo']))
+                                <p class="text-lg font-medium">No se encontraron empleados</p>
+                                <p class="text-sm">Intenta ajustar los filtros de búsqueda</p>
+                                <a href="{{ route('empleados.index') }}" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+                                    Ver todos los empleados
+                                </a>
+                            @else
+                                <p class="text-lg font-medium">No hay empleados registrados</p>
+                                <p class="text-sm">Comienza agregando tu primer empleado</p>
+                                <a href="{{ route('empleados.create') }}" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                                    Crear Empleado
+                                </a>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -182,7 +318,7 @@
 
 @if($empleados->hasPages())
     <div class="mt-6 flex justify-center">
-        {{ $empleados->links() }}
+        {{ $empleados->appends(request()->query())->links() }}
     </div>
 @endif
 

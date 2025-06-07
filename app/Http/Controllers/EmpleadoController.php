@@ -12,10 +12,47 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmpleadoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $empleados = Empleado::with(['puesto', 'departamento', 'jefe'])->paginate(10);
-        return view('empleados.index', compact('empleados'));
+        $query = Empleado::with(['puesto', 'departamento', 'jefe']);
+
+        // Filtro por búsqueda de nombre
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('nombres', 'LIKE', "%{$search}%")
+                  ->orWhere('apellido_paterno', 'LIKE', "%{$search}%")
+                  ->orWhere('apellido_materno', 'LIKE', "%{$search}%")
+                  ->orWhere('num_empleado', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filtro por departamento
+        if ($request->filled('departamento_id')) {
+            $query->where('departamento_id', $request->get('departamento_id'));
+        }
+
+        // Filtro por puesto
+        if ($request->filled('puesto_id')) {
+            $query->where('puesto_id', $request->get('puesto_id'));
+        }
+
+        // Filtro por estado activo/inactivo
+        if ($request->has('activo') && $request->get('activo') !== '') {
+            $query->where('activo', $request->get('activo'));
+        }
+
+        // Ordenar por número de empleado
+        $query->orderBy('num_empleado');
+
+        // Paginación
+        $empleados = $query->paginate(15)->withQueryString();
+
+        // Obtener datos para los selectores de filtros
+        $departamentos = Departamento::orderBy('nombre')->get();
+        $puestos = Puesto::orderBy('nombre')->get();
+
+        return view('empleados.index', compact('empleados', 'departamentos', 'puestos'));
     }
 
     public function create()
