@@ -14,43 +14,54 @@ return new class extends Migration {
             $table->id();
             $table->string('num_empleado')->unique();
 
-            $table->string('nombres');
-            $table->string('apellido_paterno');
-            $table->string('apellido_materno')->nullable();
+            // Información personal con longitudes específicas
+            $table->string('nombres', 100);
+            $table->string('apellido_paterno', 50);
+            $table->string('apellido_materno', 50)->nullable();
 
-            $table->date('fecha_nacimiento')->nullable();
-            $table->enum('genero', ['masculino', 'femenino', 'otro'])->nullable();
-            $table->string('estado_civil')->nullable();
+            $table->date('fecha_nacimiento');
+            $table->enum('genero', ['M', 'F']); // Consistente con las reglas del modelo
+            $table->enum('estado_civil', ['Soltero', 'Casado', 'Divorciado', 'Viudo', 'Union_Libre']);
 
-            $table->string('curp', 18)->nullable();
-            $table->string('rfc', 13)->nullable();
-            $table->string('nss', 15)->nullable();
+            // Documentos oficiales con longitudes exactas y únicos
+            $table->string('curp', 18)->unique();
+            $table->string('rfc', 13)->unique();
+            $table->string('nss', 11)->nullable();
 
-            $table->string('telefono', 20)->nullable();
-            $table->string('email')->unique()->nullable();
+            // Contacto
+            $table->string('telefono', 15)->nullable();
+            $table->string('email')->unique();
 
-            // Definimos claves foráneas con constrained() apuntando a tablas existentes
+            // Relaciones laborales
             $table->foreignId('puesto_id')
-                ->constrained('puestos')  // explícito, por claridad
-                ->onDelete('cascade');
+                ->constrained('puestos')
+                ->onDelete('restrict'); // Cambié a restrict para evitar eliminaciones accidentales
 
             $table->foreignId('departamento_id')
-                ->constrained('departamentos')  // explícito, para evitar errores
-                ->onDelete('cascade');
+                ->constrained('departamentos')
+                ->onDelete('restrict'); // Cambié a restrict
 
-            // Para jefe_id, si quieres clave foránea, agregar así:
+            // Relación jerárquica (jefe)
             $table->unsignedBigInteger('jefe_id')->nullable();
             $table->foreign('jefe_id')
                 ->references('id')
                 ->on('empleados')
                 ->onDelete('set null');
 
-            $table->date('fecha_ingreso')->nullable();
+            // Información laboral
+            $table->date('fecha_ingreso');
             $table->boolean('activo')->default(true);
 
             $table->string('foto')->nullable();
 
             $table->timestamps();
+            $table->softDeletes(); // Para eliminación suave
+
+            // Índices adicionales para optimizar consultas
+            $table->index('activo');
+            $table->index('departamento_id');
+            $table->index('puesto_id');
+            $table->index(['apellido_paterno', 'apellido_materno', 'nombres']);
         });
     }
 

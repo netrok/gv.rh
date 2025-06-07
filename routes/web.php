@@ -31,6 +31,7 @@ Route::get('/', function () {
 
 // Módulo: Recursos Humanos
 Route::resource('empleados', EmpleadoController::class);
+Route::get('/empleados/{empleado}/pdf', [EmpleadoController::class, 'generarPdf'])->name('empleados.pdf');
 Route::resource('puestos', PuestoController::class);
 Route::resource('departamentos', DepartamentoController::class);
 Route::resource('documentos', DocumentoController::class);
