@@ -42,7 +42,7 @@
                 </label>
                 <input type="text" name="num_empleado" id="num_empleado" 
                     value="{{ old('num_empleado', $empleado->num_empleado) }}" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('num_empleado') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('num_empleado') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('num_empleado')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -51,7 +51,7 @@
                 <label for="nombres" class="block text-sm font-medium text-gray-700">Nombres <span class="text-red-500">*</span></label>
                 <input type="text" name="nombres" id="nombres" 
                     value="{{ old('nombres', $empleado->nombres) }}" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('nombres') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('nombres') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('nombres')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -60,7 +60,7 @@
                 <label for="apellido_paterno" class="block text-sm font-medium text-gray-700">Apellido Paterno <span class="text-red-500">*</span></label>
                 <input type="text" name="apellido_paterno" id="apellido_paterno" 
                     value="{{ old('apellido_paterno', $empleado->apellido_paterno) }}" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('apellido_paterno') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('apellido_paterno') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('apellido_paterno')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -69,7 +69,7 @@
                 <label for="apellido_materno" class="block text-sm font-medium text-gray-700">Apellido Materno</label>
                 <input type="text" name="apellido_materno" id="apellido_materno" 
                     value="{{ old('apellido_materno', $empleado->apellido_materno) }}"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('apellido_materno') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('apellido_materno') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('apellido_materno')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -78,7 +78,7 @@
                 <label for="fecha_nacimiento" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento <span class="text-red-500">*</span></label>
                 <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" 
                     value="{{ old('fecha_nacimiento', $empleado->fecha_nacimiento) }}" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('fecha_nacimiento') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('fecha_nacimiento') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('fecha_nacimiento')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -86,7 +86,7 @@
             <div>
                 <label for="genero" class="block text-sm font-medium text-gray-700">Género <span class="text-red-500">*</span></label>
                 <select name="genero" id="genero" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('genero') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('genero') ? 'border-red-500' : 'border-gray-300' }}">
                     <option value="">Seleccione</option>
                     <option value="Masculino" {{ old('genero', $empleado->genero == 'M' ? 'Masculino' : ($empleado->genero == 'Masculino' ? 'Masculino' : '')) == 'Masculino' ? 'selected' : '' }}>Masculino</option>
                     <option value="Femenino" {{ old('genero', $empleado->genero == 'F' ? 'Femenino' : ($empleado->genero == 'Femenino' ? 'Femenino' : '')) == 'Femenino' ? 'selected' : '' }}>Femenino</option>
@@ -98,7 +98,7 @@
             <div>
                 <label for="estado_civil" class="block text-sm font-medium text-gray-700">Estado Civil <span class="text-red-500">*</span></label>
                 <select name="estado_civil" id="estado_civil" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('estado_civil') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('estado_civil') ? 'border-red-500' : 'border-gray-300' }}">
                     <option value="">Seleccione</option>
                     <option value="Soltero" {{ old('estado_civil', $empleado->estado_civil) == 'Soltero' ? 'selected' : '' }}>Soltero</option>
                     <option value="Casado" {{ old('estado_civil', $empleado->estado_civil) == 'Casado' ? 'selected' : '' }}>Casado</option>
@@ -114,7 +114,7 @@
                 <label for="curp" class="block text-sm font-medium text-gray-700">CURP <span class="text-red-500">*</span></label>
                 <input type="text" name="curp" id="curp" 
                     value="{{ old('curp', $empleado->curp) }}" required maxlength="18"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('curp') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('curp') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('curp')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -123,7 +123,7 @@
                 <label for="rfc" class="block text-sm font-medium text-gray-700">RFC <span class="text-red-500">*</span></label>
                 <input type="text" name="rfc" id="rfc" 
                     value="{{ old('rfc', $empleado->rfc) }}" required maxlength="13"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('rfc') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('rfc') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('rfc')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -132,7 +132,7 @@
                 <label for="nss" class="block text-sm font-medium text-gray-700">NSS</label>
                 <input type="text" name="nss" id="nss" 
                     value="{{ old('nss', $empleado->nss) }}" maxlength="11"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('nss') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('nss') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('nss')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -141,7 +141,7 @@
                 <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
                 <input type="text" name="telefono" id="telefono" 
                     value="{{ old('telefono', $empleado->telefono) }}" maxlength="15"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('telefono') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('telefono') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('telefono')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -150,7 +150,7 @@
                 <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico <span class="text-red-500">*</span></label>
                 <input type="email" name="email" id="email" 
                     value="{{ old('email', $empleado->email) }}" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('email') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
@@ -158,7 +158,7 @@
             <div>
                 <label for="puesto_id" class="block text-sm font-medium text-gray-700">Puesto <span class="text-red-500">*</span></label>
                 <select name="puesto_id" id="puesto_id" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('puesto_id') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('puesto_id') ? 'border-red-500' : 'border-gray-300' }}">
                     <option value="">Seleccione</option>
                     @foreach ($puestos as $puesto)
                         <option value="{{ $puesto->id }}" {{ old('puesto_id', $empleado->puesto_id) == $puesto->id ? 'selected' : '' }}>
@@ -173,7 +173,7 @@
             <div>
                 <label for="departamento_id" class="block text-sm font-medium text-gray-700">Departamento <span class="text-red-500">*</span></label>
                 <select name="departamento_id" id="departamento_id" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('departamento_id') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('departamento_id') ? 'border-red-500' : 'border-gray-300' }}">
                     <option value="">Seleccione</option>
                     @foreach ($departamentos as $dep)
                         <option value="{{ $dep->id }}" {{ old('departamento_id', $empleado->departamento_id) == $dep->id ? 'selected' : '' }}>
@@ -188,7 +188,7 @@
             <div>
                 <label for="jefe_id" class="block text-sm font-medium text-gray-700">Jefe Directo</label>
                 <select name="jefe_id" id="jefe_id"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('jefe_id') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('jefe_id') ? 'border-red-500' : 'border-gray-300' }}">
                     <option value="">Ninguno</option>
                     @foreach ($jefes as $jefe)
                         <option value="{{ $jefe->id }}" {{ old('jefe_id', $empleado->jefe_id) == $jefe->id ? 'selected' : '' }}>
@@ -204,7 +204,7 @@
                 <label for="fecha_ingreso" class="block text-sm font-medium text-gray-700">Fecha de Ingreso <span class="text-red-500">*</span></label>
                 <input type="date" name="fecha_ingreso" id="fecha_ingreso" 
                     value="{{ old('fecha_ingreso', $empleado->fecha_ingreso) }}" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('fecha_ingreso') border-red-500 @enderror">
+                    class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('fecha_ingreso') ? 'border-red-500' : 'border-gray-300' }}">
                 @error('fecha_ingreso')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
             </div>
 
