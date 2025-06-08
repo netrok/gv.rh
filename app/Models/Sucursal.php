@@ -9,6 +9,9 @@ class Sucursal extends Model
 {
     use HasFactory;
 
+    // Especifica el nombre correcto de la tabla
+    protected $table = 'sucursales';
+
     protected $fillable = [
         'nombre',
         'direccion',

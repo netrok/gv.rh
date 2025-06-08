@@ -26,6 +26,7 @@
                     <li><a href="{{ route('asistencias.index') }}" class="hover:text-blue-800">Asistencia</a></li>
                     <li><a href="{{ route('ausencia.index') }}" class="hover:text-blue-800">Ausencia</a></li>
                     <li><a href="{{ route('vacacion.index') }}" class="hover:text-blue-800">Vacaciones</a></li>
+                    <li><a href="{{ route('sucursales.index') }}" class="hover:text-blue-800">Sucursales</a></li>
                     <!-- Más enlaces si los tienes -->
                 </ul>
             </nav>

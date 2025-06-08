@@ -8,7 +8,9 @@ use App\Models\Departamento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class EmpleadoController extends Controller
 {
@@ -21,9 +23,9 @@ class EmpleadoController extends Controller
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nombres', 'LIKE', "%{$search}%")
-                  ->orWhere('apellido_paterno', 'LIKE', "%{$search}%")
-                  ->orWhere('apellido_materno', 'LIKE', "%{$search}%")
-                  ->orWhere('num_empleado', 'LIKE', "%{$search}%");
+                    ->orWhere('apellido_paterno', 'LIKE', "%{$search}%")
+                    ->orWhere('apellido_materno', 'LIKE', "%{$search}%")
+                    ->orWhere('num_empleado', 'LIKE', "%{$search}%");
             });
         }
 
@@ -57,214 +59,113 @@ class EmpleadoController extends Controller
 
     public function create()
     {
-        $puestos = Puesto::all();
-        $departamentos = Departamento::all();
-        $jefes = Empleado::where('activo', true)->get();
+        $puestos = Puesto::orderBy('nombre')->get();
+        $departamentos = Departamento::orderBy('nombre')->get();
+        $jefes = Empleado::where('activo', true)
+            ->select('id', 'nombres', 'apellido_paterno', 'apellido_materno')
+            ->orderBy('nombres')
+            ->get();
+        
         return view('empleados.create', compact('puestos', 'departamentos', 'jefes'));
     }
 
     public function store(Request $request)
     {
-        // DEBUG: Ver datos originales
-        \Log::info('Datos originales:', $request->all());
-
-        // Transformar los datos antes de validar
-        $data = $request->all();
-
-        // Transformar género
-        $generoMap = [
-            'Masculino' => 'M',
-            'Femenino' => 'F',
-            'masculino' => 'M',
-            'femenino' => 'F'
-        ];
-
-        if (isset($data['genero']) && isset($generoMap[$data['genero']])) {
-            $data['genero'] = $generoMap[$data['genero']];
-        }
-
-        // Transformar estado civil
-        $estadoCivilMap = [
-            'S' => 'Soltero',
-            'C' => 'Casado',
-            'D' => 'Divorciado',
-            'V' => 'Viudo',
-            'UL' => 'Union_Libre',
-            'Soltero' => 'Soltero',
-            'Casado' => 'Casado',
-            'Divorciado' => 'Divorciado',
-            'Viudo' => 'Viudo',
-            'Union_Libre' => 'Union_Libre'
-        ];
-
-        if (isset($data['estado_civil']) && isset($estadoCivilMap[$data['estado_civil']])) {
-            $data['estado_civil'] = $estadoCivilMap[$data['estado_civil']];
-        }
-
-        // Transformar checkbox activo
-        $data['activo'] = isset($data['activo']) && ($data['activo'] === 'on' || $data['activo'] == '1') ? true : false;
-
-        // DEBUG: Ver datos transformados
-        \Log::info('Datos transformados:', $data);
-
-        // Validar con las reglas correctas
-        $validator = Validator::make($data, [
-            'num_empleado' => 'required|unique:empleados,num_empleado',
-            'nombres' => 'required|string|max:100',
-            'apellido_paterno' => 'required|string|max:50',
-            'apellido_materno' => 'nullable|string|max:50',
-            'fecha_nacimiento' => 'required|date|before:today',
-            'genero' => 'required|in:M,F',
-            'estado_civil' => 'required|in:Soltero,Casado,Divorciado,Viudo,Union_Libre',
-            'curp' => 'required|string|size:18|unique:empleados,curp',
-            'rfc' => 'required|string|size:13|unique:empleados,rfc',
-            'nss' => 'nullable|string|max:11',
-            'telefono' => 'nullable|string|max:15',
-            'email' => 'required|email|unique:empleados,email',
-            'puesto_id' => 'required|exists:puestos,id',
-            'departamento_id' => 'required|exists:departamentos,id',
-            'jefe_id' => 'nullable|exists:empleados,id',
-            'fecha_ingreso' => 'required|date|before_or_equal:today',
-            'activo' => 'boolean',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        if ($validator->fails()) {
-            \Log::error('Errores de validación:', $validator->errors()->toArray());
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error', 'Errores de validación: ' . implode(', ', $validator->errors()->all()));
-        }
-
         try {
+            // Transformar y validar datos
+            $data = $this->transformarDatos($request);
+            $validator = $this->validarDatos($data);
+
+            if ($validator->fails()) {
+                Log::warning('Errores de validación en store:', $validator->errors()->toArray());
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput()
+                    ->with('error', 'Por favor corrige los errores en el formulario.');
+            }
+
             // Manejar la foto antes de crear el empleado
             if ($request->hasFile('foto')) {
                 $data['foto'] = $this->manejarFoto($request);
-                \Log::info('Foto manejada:', ['foto' => $data['foto']]);
-            } else {
-                unset($data['foto']); // Remover si no hay archivo
             }
-
-            \Log::info('Datos finales para crear:', $data);
 
             $empleado = Empleado::create($data);
 
-            \Log::info('Empleado creado exitosamente:', ['id' => $empleado->id]);
+            Log::info('Empleado creado exitosamente:', ['id' => $empleado->id, 'num_empleado' => $empleado->num_empleado]);
 
             return redirect()->route('empleados.index')
                 ->with('success', 'Empleado creado exitosamente.');
 
         } catch (\Exception $e) {
-            \Log::error('Error al crear empleado:', [
+            Log::error('Error al crear empleado:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error al crear el empleado: ' . $e->getMessage());
+                ->with('error', 'Error al crear el empleado. Por favor intenta nuevamente.');
         }
     }
 
     public function show(Empleado $empleado)
     {
-        $empleado->load(['puesto', 'departamento', 'jefe']);
+        $empleado->load(['puesto', 'departamento', 'jefe', 'subordinados']);
         return view('empleados.show', compact('empleado'));
     }
 
     public function edit(Empleado $empleado)
     {
-        $puestos = Puesto::all();
-        $departamentos = Departamento::all();
-        $jefes = Empleado::where('id', '!=', $empleado->id)->where('activo', true)->get();
+        $puestos = Puesto::orderBy('nombre')->get();
+        $departamentos = Departamento::orderBy('nombre')->get();
+        $jefes = Empleado::where('id', '!=', $empleado->id)
+            ->where('activo', true)
+            ->select('id', 'nombres', 'apellido_paterno', 'apellido_materno')
+            ->orderBy('nombres')
+            ->get();
+        
         return view('empleados.edit', compact('empleado', 'puestos', 'departamentos', 'jefes'));
     }
 
     public function update(Request $request, Empleado $empleado)
     {
-        // Transformar los datos antes de validar
-        $data = $request->all();
-
-        // Transformar género
-        $generoMap = [
-            'Masculino' => 'M',
-            'Femenino' => 'F',
-            'masculino' => 'M',
-            'femenino' => 'F'
-        ];
-
-        if (isset($data['genero']) && isset($generoMap[$data['genero']])) {
-            $data['genero'] = $generoMap[$data['genero']];
-        }
-
-        // Transformar estado civil
-        $estadoCivilMap = [
-            'S' => 'Soltero',
-            'C' => 'Casado',
-            'D' => 'Divorciado',
-            'V' => 'Viudo',
-            'UL' => 'Union_Libre',
-            'Soltero' => 'Soltero',
-            'Casado' => 'Casado',
-            'Divorciado' => 'Divorciado',
-            'Viudo' => 'Viudo',
-            'Union_Libre' => 'Union_Libre'
-        ];
-
-        if (isset($data['estado_civil']) && isset($estadoCivilMap[$data['estado_civil']])) {
-            $data['estado_civil'] = $estadoCivilMap[$data['estado_civil']];
-        }
-
-        // Transformar checkbox activo
-        $data['activo'] = isset($data['activo']) && ($data['activo'] === 'on' || $data['activo'] == '1') ? true : false;
-
-        $validator = Validator::make($data, [
-            'num_empleado' => 'required|unique:empleados,num_empleado,' . $empleado->id,
-            'nombres' => 'required|string|max:100',
-            'apellido_paterno' => 'required|string|max:50',
-            'apellido_materno' => 'nullable|string|max:50',
-            'fecha_nacimiento' => 'required|date|before:today',
-            'genero' => 'required|in:M,F',
-            'estado_civil' => 'required|in:Soltero,Casado,Divorciado,Viudo,Union_Libre',
-            'curp' => 'required|string|size:18|unique:empleados,curp,' . $empleado->id,
-            'rfc' => 'required|string|size:13|unique:empleados,rfc,' . $empleado->id,
-            'nss' => 'nullable|string|max:11',
-            'telefono' => 'nullable|string|max:15',
-            'email' => 'required|email|unique:empleados,email,' . $empleado->id,
-            'puesto_id' => 'required|exists:puestos,id',
-            'departamento_id' => 'required|exists:departamentos,id',
-            'jefe_id' => 'nullable|exists:empleados,id|not_in:' . $empleado->id,
-            'fecha_ingreso' => 'required|date|before_or_equal:today',
-            'activo' => 'boolean',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error', 'Por favor corrige los errores en el formulario.');
-        }
-
         try {
+            // Transformar y validar datos
+            $data = $this->transformarDatos($request);
+            $validator = $this->validarDatos($data, $empleado->id);
+
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput()
+                    ->with('error', 'Por favor corrige los errores en el formulario.');
+            }
+
             // Manejar la foto
             if ($request->hasFile('foto')) {
                 $data['foto'] = $this->manejarFoto($request, $empleado);
             } else {
-                $data['foto'] = $empleado->foto; // Mantener la foto existente
+                // Mantener la foto existente si no se sube una nueva
+                unset($data['foto']);
             }
 
             $empleado->update($data);
+
+            Log::info('Empleado actualizado exitosamente:', ['id' => $empleado->id]);
+
             return redirect()->route('empleados.index')
                 ->with('success', 'Empleado actualizado exitosamente.');
 
         } catch (\Exception $e) {
+            Log::error('Error al actualizar empleado:', [
+                'message' => $e->getMessage(),
+                'empleado_id' => $empleado->id
+            ]);
+
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error al actualizar el empleado: ' . $e->getMessage());
+                ->with('error', 'Error al actualizar el empleado. Por favor intenta nuevamente.');
         }
     }
 
@@ -272,9 +173,10 @@ class EmpleadoController extends Controller
     {
         try {
             // Verificar si el empleado es jefe de otros
-            if (Empleado::where('jefe_id', $empleado->id)->exists()) {
+            $subordinados = Empleado::where('jefe_id', $empleado->id)->count();
+            if ($subordinados > 0) {
                 return redirect()->route('empleados.index')
-                    ->with('error', 'No se puede eliminar al empleado porque es jefe de otros empleados.');
+                    ->with('error', "No se puede eliminar al empleado porque es jefe de {$subordinados} empleado(s).");
             }
 
             // Eliminar foto si existe
@@ -282,63 +184,208 @@ class EmpleadoController extends Controller
                 Storage::disk('public')->delete($empleado->foto);
             }
 
+            $nombreEmpleado = $empleado->nombres . ' ' . $empleado->apellido_paterno;
             $empleado->delete();
+
+            Log::info('Empleado eliminado:', ['nombre' => $nombreEmpleado]);
 
             return redirect()->route('empleados.index')
                 ->with('success', 'Empleado eliminado exitosamente.');
 
         } catch (\Exception $e) {
+            Log::error('Error al eliminar empleado:', [
+                'message' => $e->getMessage(),
+                'empleado_id' => $empleado->id
+            ]);
+
             return redirect()->route('empleados.index')
-                ->with('error', 'Error al eliminar el empleado: ' . $e->getMessage());
+                ->with('error', 'Error al eliminar el empleado. Por favor intenta nuevamente.');
         }
     }
 
-    private function manejarFoto(Request $request, Empleado $empleado = null)
+    public function generarPdf(Empleado $empleado)
     {
-        if ($request->hasFile('foto')) {
+        try {
+            // Cargar las relaciones necesarias
+            $empleado->load(['puesto', 'departamento', 'jefe', 'subordinados.puesto']);
+
+            // Datos para el PDF
+            $data = [
+                'empleado' => $empleado,
+                'fecha_generacion' => now()->format('d/m/Y H:i:s'),
+                'titulo' => 'Reporte de Empleado - ' . $empleado->nombres . ' ' . $empleado->apellido_paterno
+            ];
+
+            // Generar el PDF con configuraciones específicas
+            $pdf = Pdf::loadView('empleados.pdf', $data);
+
+            // Configurar el PDF
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'Arial',
+                'debugKeepTemp' => false,
+                'debugCss' => false,
+                'debugLayout' => false,
+                'debugLayoutLines' => false,
+                'debugLayoutBlocks' => false,
+                'debugLayoutInline' => false,
+            ]);
+
+            // Nombre del archivo
+            $nombreArchivo = 'empleado_' . $empleado->num_empleado . '_' . now()->format('Y-m-d') . '.pdf';
+
+            Log::info('PDF generado para empleado:', ['empleado_id' => $empleado->id, 'archivo' => $nombreArchivo]);
+
+            return $pdf->download($nombreArchivo);
+
+        } catch (\Exception $e) {
+            Log::error('Error al generar PDF:', [
+                'message' => $e->getMessage(),
+                'empleado_id' => $empleado->id
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Error al generar el PDF. Por favor intenta nuevamente.');
+        }
+    }
+
+    /**
+     * Transformar los datos del request antes de la validación
+     */
+    private function transformarDatos(Request $request): array
+    {
+        $data = $request->all();
+
+        // Transformar género
+        $generoMap = [
+            'Masculino' => 'M',
+            'Femenino' => 'F',
+            'masculino' => 'M',
+            'femenino' => 'F'
+        ];
+
+        if (isset($data['genero']) && array_key_exists($data['genero'], $generoMap)) {
+            $data['genero'] = $generoMap[$data['genero']];
+        }
+
+        // Transformar estado civil
+        $estadoCivilMap = [
+            'S' => 'Soltero',
+            'C' => 'Casado',
+            'D' => 'Divorciado',
+            'V' => 'Viudo',
+            'UL' => 'Union_Libre',
+            'Soltero' => 'Soltero',
+            'Casado' => 'Casado',
+            'Divorciado' => 'Divorciado',
+            'Viudo' => 'Viudo',
+            'Union_Libre' => 'Union_Libre'
+        ];
+
+        if (isset($data['estado_civil']) && array_key_exists($data['estado_civil'], $estadoCivilMap)) {
+            $data['estado_civil'] = $estadoCivilMap[$data['estado_civil']];
+        }
+
+        // Transformar checkbox activo
+        $data['activo'] = isset($data['activo']) && in_array($data['activo'], ['on', '1', 1, true], true);
+
+        // Limpiar strings
+        $stringFields = ['nombres', 'apellido_paterno', 'apellido_materno', 'curp', 'rfc', 'nss', 'telefono'];
+        foreach ($stringFields as $field) {
+            if (isset($data[$field])) {
+                $data[$field] = trim($data[$field]);
+                if ($field === 'curp' || $field === 'rfc') {
+                    $data[$field] = strtoupper($data[$field]);
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Validar los datos del empleado
+     */
+    private function validarDatos(array $data, ?int $empleadoId = null): \Illuminate\Validation\Validator
+    {
+        $uniqueRule = $empleadoId ? ",{$empleadoId}" : '';
+
+        $rules = [
+            'num_empleado' => 'required|string|max:20|unique:empleados,num_empleado' . $uniqueRule,
+            'nombres' => 'required|string|max:100',
+            'apellido_paterno' => 'required|string|max:50',
+            'apellido_materno' => 'nullable|string|max:50',
+            'fecha_nacimiento' => 'required|date|before:today|after:1900-01-01',
+            'genero' => 'required|in:M,F',
+            'estado_civil' => 'required|in:Soltero,Casado,Divorciado,Viudo,Union_Libre',
+            'curp' => 'required|string|size:18|unique:empleados,curp' . $uniqueRule,
+            'rfc' => 'required|string|size:13|unique:empleados,rfc' . $uniqueRule,
+            'nss' => 'nullable|string|max:11',
+            'telefono' => 'nullable|string|max:15',
+            'email' => 'required|email|max:100|unique:empleados,email' . $uniqueRule,
+            'puesto_id' => 'required|exists:puestos,id',
+            'departamento_id' => 'required|exists:departamentos,id',
+            'jefe_id' => 'nullable|exists:empleados,id' . ($empleadoId ? "|not_in:{$empleadoId}" : ''),
+            'fecha_ingreso' => 'required|date|before_or_equal:today',
+            'activo' => 'boolean',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ];
+
+        $messages = [
+            'num_empleado.unique' => 'Este número de empleado ya está en uso.',
+            'curp.unique' => 'Esta CURP ya está registrada.',
+            'rfc.unique' => 'Este RFC ya está registrado.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'fecha_nacimiento.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
+            'fecha_nacimiento.after' => 'La fecha de nacimiento no puede ser anterior a 1900.',
+            'fecha_ingreso.before_or_equal' => 'La fecha de ingreso no puede ser futura.',
+            'jefe_id.not_in' => 'Un empleado no puede ser jefe de sí mismo.',
+            'foto.max' => 'La foto no debe superar los 2MB.',
+            'foto.mimes' => 'La foto debe ser un archivo JPG, JPEG, PNG o WebP.',
+        ];
+
+        return Validator::make($data, $rules, $messages);
+    }
+
+    /**
+     * Manejar la subida y almacenamiento de fotos
+     */
+    private function manejarFoto(Request $request, ?Empleado $empleado = null): ?string
+    {
+        if (!$request->hasFile('foto')) {
+            return null;
+        }
+
+        try {
+            $file = $request->file('foto');
+            
+            // Validar que el archivo sea válido
+            if (!$file->isValid()) {
+                throw new \Exception('Archivo de foto no válido');
+            }
+
             // Eliminar foto anterior si existe
             if ($empleado && $empleado->foto && Storage::disk('public')->exists($empleado->foto)) {
                 Storage::disk('public')->delete($empleado->foto);
             }
 
-            $file = $request->file('foto');
-            $filename = time() . '_' . uniqid() . '.' . $file->extension();
-            return $file->storeAs('fotos_empleados', $filename, 'public');
+            // Generar nombre único para el archivo
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'empleado_' . time() . '_' . Str::random(10) . '.' . $extension;
+            
+            // Almacenar el archivo
+            $path = $file->storeAs('fotos_empleados', $filename, 'public');
+            
+            Log::info('Foto almacenada exitosamente:', ['path' => $path]);
+            
+            return $path;
+
+        } catch (\Exception $e) {
+            Log::error('Error al manejar foto:', ['message' => $e->getMessage()]);
+            throw new \Exception('Error al procesar la foto: ' . $e->getMessage());
         }
-
-        return $empleado ? $empleado->foto : null;
-    }
-
-    public function generarPdf(Empleado $empleado)
-    {
-        // Cargar las relaciones necesarias
-        $empleado->load(['puesto', 'departamento', 'jefe', 'subordinados.puesto']);
-
-        // Datos adicionales para el PDF
-        $data = [
-            'empleado' => $empleado,
-            'fecha_generacion' => now()->format('d/m/Y H:i:s'),
-            'titulo' => 'Reporte de Empleado - ' . $empleado->nombres . ' ' . $empleado->apellido_paterno
-        ];
-
-        // Generar el PDF con configuraciones específicas para imágenes
-        $pdf = Pdf::loadView('empleados.pdf', $data);
-
-        // Configurar el PDF
-        $pdf->setPaper('A4', 'portrait');
-
-        // Configuraciones adicionales para imágenes
-        $pdf->setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isPhpEnabled' => true,
-            'isRemoteEnabled' => true,
-            'defaultFont' => 'Arial'
-        ]);
-
-        // Nombre del archivo
-        $nombreArchivo = 'empleado_' . $empleado->num_empleado . '_' . date('Y-m-d') . '.pdf';
-
-        // Retornar el PDF para descarga
-        return $pdf->download($nombreArchivo);
     }
 }

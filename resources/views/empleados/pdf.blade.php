@@ -5,318 +5,450 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $titulo }}</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            color: #333;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @page {
+            margin: 15mm;
+            size: A4;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11px;
+            line-height: 1.3;
+            color: #2D3748;
+            background: white;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #4F46E5;
-            padding-bottom: 20px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #4F46E5;
+            padding-bottom: 15px;
         }
         
         .header h1 {
             color: #4F46E5;
-            margin: 0;
-            font-size: 24px;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
         
         .header .subtitle {
-            color: #6B7280;
-            margin: 5px 0 0 0;
-            font-size: 14px;
+            color: #718096;
+            font-size: 13px;
+            margin: 3px 0;
         }
         
-        .employee-info {
-            display: table;
-            width: 100%;
+        .header .employee-name {
+            color: #2D3748;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 8px 0 5px 0;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
             margin-bottom: 20px;
         }
         
         .photo-section {
-            display: table-cell;
-            width: 150px;
-            vertical-align: top;
+            flex: 0 0 140px;
             text-align: center;
-            padding-right: 20px;
         }
         
-        .photo-placeholder {
+        .photo-container {
             width: 120px;
             height: 120px;
-            border: 2px solid #E5E7EB;
-            border-radius: 8px;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #F9FAFB;
-            margin: 0 auto;
+            margin: 0 auto 12px auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .photo-placeholder {
+            color: #A0AEC0;
+            font-size: 10px;
+            text-align: center;
         }
         
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 10px;
             font-weight: bold;
-            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .status-active {
-            background-color: #D1FAE5;
-            color: #065F46;
+            background: linear-gradient(135deg, #C6F6D5 0%, #9AE6B4 100%);
+            color: #22543D;
+            border: 1px solid #68D391;
         }
         
         .status-inactive {
-            background-color: #FEE2E2;
-            color: #991B1B;
+            background: linear-gradient(135deg, #FED7D7 0%, #FBB6CE 100%);
+            color: #742A2A;
+            border: 1px solid #F56565;
         }
         
         .details-section {
-            display: table-cell;
-            vertical-align: top;
+            flex: 1;
         }
         
         .section {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            break-inside: avoid;
         }
         
         .section-title {
-            background-color: #4F46E5;
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
             color: white;
-            padding: 8px 12px;
-            margin: 0 0 15px 0;
-            font-size: 14px;
+            padding: 10px 16px;
+            font-size: 12px;
             font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .section-content {
+            border: 1px solid #E2E8F0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            padding: 16px;
+            background: #FAFAFA;
         }
         
         .field-grid {
-            display: table;
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .field-row {
-            display: table-row;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 8px 16px;
+            align-items: start;
         }
         
         .field-label {
-            display: table-cell;
-            width: 30%;
-            padding: 6px 12px 6px 0;
-            font-weight: bold;
-            color: #6B7280;
-            vertical-align: top;
+            font-weight: 600;
+            color: #4A5568;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 4px 0;
         }
         
         .field-value {
-            display: table-cell;
-            padding: 6px 0;
-            color: #111827;
-            vertical-align: top;
+            color: #2D3748;
+            font-size: 11px;
+            padding: 4px 0;
+            word-break: break-word;
+        }
+        
+        .field-value strong {
+            font-weight: 700;
+            color: #1A202C;
+        }
+        
+        .field-value.monospace {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            background: #F7FAFC;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+        }
+        
+        .subordinados-section {
+            margin-top: 20px;
         }
         
         .subordinados-grid {
-            display: table;
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
         }
         
-        .subordinado-row {
-            display: table-row;
-            border-bottom: 1px solid #E5E7EB;
+        .subordinado-item {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            align-items: center;
         }
         
-        .subordinado-cell {
-            display: table-cell;
-            padding: 8px 12px 8px 0;
-            vertical-align: middle;
+        .subordinado-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .subordinado-name {
+            font-weight: 600;
+            color: #2D3748;
+            font-size: 11px;
+        }
+        
+        .subordinado-puesto {
+            color: #4A5568;
+            font-size: 10px;
+        }
+        
+        .subordinado-numero {
+            color: #718096;
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            text-align: right;
         }
         
         .footer {
-            margin-top: 40px;
+            margin-top: 30px;
             text-align: center;
-            font-size: 10px;
-            color: #6B7280;
-            border-top: 1px solid #E5E7EB;
+            font-size: 9px;
+            color: #718096;
+            border-top: 1px solid #E2E8F0;
             padding-top: 15px;
+            page-break-inside: avoid;
         }
         
-        .page-break {
-            page-break-after: always;
+        .footer p {
+            margin: 2px 0;
+        }
+        
+        /* Mejoras para impresión */
+        @media print {
+            body { 
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .main-content {
+                display: block;
+            }
+            
+            .photo-section {
+                float: left;
+                margin-right: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .details-section {
+                overflow: hidden;
+            }
+        }
+        
+        /* Responsive para pantallas pequeñas */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .photo-section {
+                flex: none;
+                margin-bottom: 20px;
+            }
+            
+            .field-grid {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            
+            .field-label {
+                font-weight: bold;
+                margin-bottom: 2px;
+            }
+            
+            .subordinado-item {
+                grid-template-columns: 1fr;
+                gap: 4px;
+                text-align: center;
+            }
+            
+            .subordinado-numero {
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>REPORTE DE EMPLEADO</h1>
-        <p class="subtitle">{{ $empleado->nombres }} {{ $empleado->apellido_paterno }} {{ $empleado->apellido_materno }}</p>
-        <p class="subtitle">Generado el: {{ $fecha_generacion }}</p>
-    </div>
-
-    <div class="employee-info">
-        <div class="photo-section">
-            @if($empleado->foto && file_exists(public_path('storage/' . $empleado->foto)))
-                <img src="{{ public_path('storage/' . $empleado->foto) }}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #E5E7EB;">
-            @else
-                <div class="photo-placeholder">
-                    <span style="color: #9CA3AF; font-size: 10px;">Sin foto</span>
-                </div>
-            @endif
-            
-            <div class="status-badge {{ $empleado->activo ? 'status-active' : 'status-inactive' }}">
-                {{ $empleado->activo ? 'ACTIVO' : 'INACTIVO' }}
-            </div>
+    <div class="container">
+        <div class="header">
+            <h1>REPORTE DE EMPLEADO</h1>
+            <div class="employee-name">{{ $empleado->nombres }} {{ $empleado->apellido_paterno }} {{ $empleado->apellido_materno }}</div>
+            <p class="subtitle">Generado el: {{ $fecha_generacion }}</p>
         </div>
 
-        <div class="details-section">
-            <!-- Información Personal -->
-            <div class="section">
-                <h3 class="section-title">INFORMACIÓN PERSONAL</h3>
-                <div class="field-grid">
-                    <div class="field-row">
-                        <div class="field-label">Número de Empleado:</div>
-                        <div class="field-value"><strong>{{ $empleado->num_empleado }}</strong></div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Nombres:</div>
-                        <div class="field-value">{{ $empleado->nombres }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Apellido Paterno:</div>
-                        <div class="field-value">{{ $empleado->apellido_paterno }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Apellido Materno:</div>
-                        <div class="field-value">{{ $empleado->apellido_materno ?? 'No especificado' }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Fecha de Nacimiento:</div>
-                        <div class="field-value">{{ \Carbon\Carbon::parse($empleado->fecha_nacimiento)->format('d/m/Y') }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Edad:</div>
-                        <div class="field-value">{{ \Carbon\Carbon::parse($empleado->fecha_nacimiento)->age }} años</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Género:</div>
-                        <div class="field-value">{{ $empleado->genero }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Estado Civil:</div>
-                        <div class="field-value">{{ str_replace('_', ' ', $empleado->estado_civil) }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Información Legal -->
-            <div class="section">
-                <h3 class="section-title">INFORMACIÓN LEGAL</h3>
-                <div class="field-grid">
-                    <div class="field-row">
-                        <div class="field-label">CURP:</div>
-                        <div class="field-value" style="font-family: monospace;">{{ $empleado->curp }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">RFC:</div>
-                        <div class="field-value" style="font-family: monospace;">{{ $empleado->rfc }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">NSS:</div>
-                        <div class="field-value" style="font-family: monospace;">{{ $empleado->nss ?? 'No especificado' }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Información de Contacto -->
-            <div class="section">
-                <h3 class="section-title">INFORMACIÓN DE CONTACTO</h3>
-                <div class="field-grid">
-                    <div class="field-row">
-                        <div class="field-label">Teléfono:</div>
-                        <div class="field-value">{{ $empleado->telefono ?? 'No especificado' }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Correo Electrónico:</div>
-                        <div class="field-value">{{ $empleado->email }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Información Laboral -->
-            <div class="section">
-                <h3 class="section-title">INFORMACIÓN LABORAL</h3>
-                <div class="field-grid">
-                    <div class="field-row">
-                        <div class="field-label">Puesto:</div>
-                        <div class="field-value">{{ $empleado->puesto->nombre ?? 'No asignado' }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Departamento:</div>
-                        <div class="field-value">{{ $empleado->departamento->nombre ?? 'No asignado' }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Jefe Directo:</div>
-                        <div class="field-value">
-                            @if($empleado->jefe)
-                                {{ $empleado->jefe->nombres }} {{ $empleado->jefe->apellido_paterno }}
-                            @else
-                                No asignado
-                            @endif
+        <div class="main-content">
+            <div class="photo-section">
+                <div class="photo-container">
+                    @if($empleado->foto_base64)
+                        <img src="{{ $empleado->foto_base64 }}" alt="Foto del empleado">
+                    @else
+                        <div class="photo-placeholder">
+                            Sin foto<br>disponible
                         </div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Fecha de Ingreso:</div>
-                        <div class="field-value">{{ \Carbon\Carbon::parse($empleado->fecha_ingreso)->format('d/m/Y') }}</div>
-                    </div>
-                    <div class="field-row">
-                        <div class="field-label">Tiempo en la empresa:</div>
-                        <div class="field-value">
-                            @php
-                                $fechaIngreso = \Carbon\Carbon::parse($empleado->fecha_ingreso);
-                                $años = $fechaIngreso->diffInYears(now());
-                                $meses = $fechaIngreso->copy()->addYears($años)->diffInMonths(now());
-                            @endphp
-                            {{ $años }} años, {{ $meses }} meses
-                        </div>
-                    </div>
+                    @endif
+                </div>
+                
+                <div class="status-badge {{ $empleado->activo ? 'status-active' : 'status-inactive' }}">
+                    {{ $empleado->activo ? 'Activo' : 'Inactivo' }}
                 </div>
             </div>
 
-            <!-- Empleados a Cargo -->
-            @if($empleado->subordinados && $empleado->subordinados->count() > 0)
+            <div class="details-section">
+                <!-- Información Personal -->
                 <div class="section">
-                    <h3 class="section-title">EMPLEADOS A CARGO ({{ $empleado->subordinados->count() }})</h3>
-                    <div class="subordinados-grid">
-                        @foreach($empleado->subordinados as $subordinado)
-                            <div class="subordinado-row">
-                                <div class="subordinado-cell" style="width: 40%;">
-                                    <strong>{{ $subordinado->nombres }} {{ $subordinado->apellido_paterno }}</strong>
-                                </div>
-                                <div class="subordinado-cell" style="width: 30%;">
-                                    {{ $subordinado->puesto->nombre ?? 'Sin puesto' }}
-                                </div>
-                                <div class="subordinado-cell" style="width: 30%;">
-                                    {{ $subordinado->num_empleado }}
-                                </div>
-                            </div>
-                        @endforeach
+                    <h3 class="section-title">Información Personal</h3>
+                    <div class="section-content">
+                        <div class="field-grid">
+                            <div class="field-label">Número de Empleado:</div>
+                            <div class="field-value"><strong>{{ $empleado->num_empleado }}</strong></div>
+                            
+                            <div class="field-label">Nombres:</div>
+                            <div class="field-value">{{ $empleado->nombres }}</div>
+                            
+                            <div class="field-label">Apellido Paterno:</div>
+                            <div class="field-value">{{ $empleado->apellido_paterno }}</div>
+                            
+                            <div class="field-label">Apellido Materno:</div>
+                            <div class="field-value">{{ $empleado->apellido_materno ?? 'No especificado' }}</div>
+                            
+                            <div class="field-label">Fecha de Nacimiento:</div>
+                            <div class="field-value">{{ \Carbon\Carbon::parse($empleado->fecha_nacimiento)->format('d/m/Y') }}</div>
+                            
+                            <div class="field-label">Edad:</div>
+                            <div class="field-value">{{ \Carbon\Carbon::parse($empleado->fecha_nacimiento)->age }} años</div>
+                            
+                            <div class="field-label">Género:</div>
+                            <div class="field-value">{{ $empleado->genero }}</div>
+                            
+                            <div class="field-label">Estado Civil:</div>
+                            <div class="field-value">{{ str_replace('_', ' ', $empleado->estado_civil) }}</div>
+                        </div>
                     </div>
                 </div>
-            @endif
-        </div>
-    </div>
 
-    <div class="footer">
-        <p>Este documento fue generado automáticamente el {{ $fecha_generacion }}</p>
-        <p>Sistema de Gestión de Empleados</p>
+                <!-- Información Legal -->
+                <div class="section">
+                    <h3 class="section-title">Información Legal</h3>
+                    <div class="section-content">
+                        <div class="field-grid">
+                            <div class="field-label">CURP:</div>
+                            <div class="field-value monospace">{{ $empleado->curp }}</div>
+                            
+                            <div class="field-label">RFC:</div>
+                            <div class="field-value monospace">{{ $empleado->rfc }}</div>
+                            
+                            <div class="field-label">NSS:</div>
+                            <div class="field-value monospace">{{ $empleado->nss ?? 'No especificado' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de Contacto -->
+                <div class="section">
+                    <h3 class="section-title">Información de Contacto</h3>
+                    <div class="section-content">
+                        <div class="field-grid">
+                            <div class="field-label">Teléfono:</div>
+                            <div class="field-value">{{ $empleado->telefono ?? 'No especificado' }}</div>
+                            
+                            <div class="field-label">Correo Electrónico:</div>
+                            <div class="field-value">{{ $empleado->email }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Laboral -->
+                <div class="section">
+                    <h3 class="section-title">Información Laboral</h3>
+                    <div class="section-content">
+                        <div class="field-grid">
+                            <div class="field-label">Puesto:</div>
+                            <div class="field-value">{{ $empleado->puesto->nombre ?? 'No asignado' }}</div>
+                            
+                            <div class="field-label">Departamento:</div>
+                            <div class="field-value">{{ $empleado->departamento->nombre ?? 'No asignado' }}</div>
+                            
+                            <div class="field-label">Jefe Directo:</div>
+                            <div class="field-value">
+                                @if($empleado->jefe)
+                                    {{ $empleado->jefe->nombres }} {{ $empleado->jefe->apellido_paterno }}
+                                @else
+                                    No asignado
+                                @endif
+                            </div>
+                            
+                            <div class="field-label">Fecha de Ingreso:</div>
+                            <div class="field-value">{{ \Carbon\Carbon::parse($empleado->fecha_ingreso)->format('d/m/Y') }}</div>
+                            
+                            <div class="field-label">Tiempo en la empresa:</div>
+                            <div class="field-value">
+                                @php
+                                    $fechaIngreso = \Carbon\Carbon::parse($empleado->fecha_ingreso);
+                                    $años = $fechaIngreso->diffInYears(now());
+                                    $meses = $fechaIngreso->copy()->addYears($años)->diffInMonths(now());
+                                @endphp
+                                {{ $años }} años, {{ $meses }} meses
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empleados a Cargo -->
+                @if($empleado->subordinados && $empleado->subordinados->count() > 0)
+                    <div class="section subordinados-section">
+                        <h3 class="section-title">Empleados a Cargo ({{ $empleado->subordinados->count() }})</h3>
+                        <div class="section-content">
+                            <div class="subordinados-grid">
+                                @foreach($empleado->subordinados as $subordinado)
+                                    <div class="subordinado-item">
+                                        <div class="subordinado-name">
+                                            {{ $subordinado->nombres }} {{ $subordinado->apellido_paterno }}
+                                        </div>
+                                        <div class="subordinado-puesto">
+                                            {{ $subordinado->puesto->nombre ?? 'Sin puesto' }}
+                                        </div>
+                                        <div class="subordinado-numero">
+                                            {{ $subordinado->num_empleado }}
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Este documento fue generado automáticamente el {{ $fecha_generacion }}</p>
+            <p>Sistema de Gestión de Empleados</p>
+        </div>
     </div>
 </body>
 </html>

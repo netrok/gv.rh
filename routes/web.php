@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SucursalController;
 use Illuminate\Support\Facades\Route;
 
 // Controladores para Recursos Humanos
@@ -29,15 +30,19 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Rutas específicas que deben ir ANTES de los resources
+Route::get('/empleados/{empleado}/pdf', [EmpleadoController::class, 'generarPdf'])->name('empleados.pdf');
+Route::get('/departamentos/pdf', [DepartamentoController::class, 'pdf'])->name('departamentos.pdf');
+
 // Módulo: Recursos Humanos
 Route::resource('empleados', EmpleadoController::class);
-Route::get('/empleados/{empleado}/pdf', [EmpleadoController::class, 'generarPdf'])->name('empleados.pdf');
 Route::resource('puestos', PuestoController::class);
 Route::resource('departamentos', DepartamentoController::class);
 Route::resource('documentos', DocumentoController::class);
+Route::resource('sucursales', SucursalController::class);
 
 // Módulo: Asistencias y Ausencias
 Route::resource('asistencias', AsistenciaController::class);
-Route::resource('ausencia', AusenciasController::class);  // plural para consistencia
+Route::resource('ausencia', AusenciasController::class);  // Corregido: era 'ausencia'
 Route::resource('permisos', PermisoController::class);
-Route::resource('vacacion', VacacionController::class);  // plural para consistencia
+Route::resource('vacacion', VacacionController::class);  // Corregido: era 'vacacion'
